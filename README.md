@@ -1,2 +1,2 @@
 # Railway-Ticket-Management-System
-A Railway Ticket Management System Project
+A railway ticket management system designed to manage railway ticket booking , cancellation , passanger details ,train information and ticket records efficiently .
