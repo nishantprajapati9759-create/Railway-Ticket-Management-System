@@ -25,7 +25,7 @@ bool checkUsername(string username)
     login.close();
     return usernameExists;
 }
-bool checkPassword(string uasername,string password)
+bool checkPassword(string username,string password)
 {
     bool passwordExists=false;
     ifstream login;
@@ -95,7 +95,7 @@ int main()
         cout<<"Enter username:";
         cin.ignore();
         getline(cin,username);
-        while(checkUsername(username)==false||checkPassword(password)==false)
+        while(checkUsername(username)==false||checkPassword(username,password)==false)
         {
             if(checkUsername(username)==false)
             {
