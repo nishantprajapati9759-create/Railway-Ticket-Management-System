@@ -19,12 +19,13 @@ public:
 
 class Passenger : public Person {
 private:
+    static int nextId;
     int passengerID;
 
 public:
-    Passenger(int id, string n, int a, string g = "")
+    Passenger( string n, int a, string g = "")
         : Person(n, a, g) {
-        passengerID = id;
+        passengerID = nextId++;
     }
 
     int getID() const {
@@ -38,6 +39,7 @@ public:
         cout << ", Gender: " << gender << '\n';
     }
 };
+int Passenger::nextId=101;
 
 class PassengerManagement {
 private:
@@ -45,8 +47,8 @@ private:
 
 public:
    
-    void addPassenger(int id, string name, int age, string gender = "") {
-        passengers.emplace_back(id, name, age, gender);
+    void addPassenger( string name, int age, string gender = "") {
+        passengers.emplace_back(name, age, gender);
         cout << "Passenger added!\n";
     }
 
@@ -95,10 +97,21 @@ public:
 
 int main() {
     PassengerManagement pm;
-
-    pm.addPassenger(101, "Aditiya Rathi", 25, "Male");
-    pm.addPassenger(102, "Aastha", 19, "Female");
-    pm.addPassenger(103, "dhruvvvvvvvv", 22, "Male");
+    string name;
+    int age;
+    string gender;
+    int n=3;
+    
+    for(int i=0 ; i<3 ; i++)
+    {
+        cout<<"enter the name";
+        cin>>name;
+        cout<<"enter the age";
+        cin>>age;
+        cout<<"enter the gender";
+        cin>>gender;
+        pm.addPassenger(name , age , gender);
+    }
 
     cout << "\nAll Passengers:\n";
     pm.displayPassengers();
