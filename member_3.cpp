@@ -4,9 +4,10 @@ using namespace std;
 
 const int TOTAL_SEATS = 2;
 const int MAX_WAITING = 5;
+const int TABLE_SIZE = 101;
 
 
-// ************* PASSENGER'S INFORMATION CLASS **************
+// ================= PASSENGER CLASS =================
 
 class PassengerInfo
 {
@@ -17,7 +18,7 @@ private:
 
 public:
 
-    // Constructor 1
+    // Default Constructor
     PassengerInfo()
     {
         name = "";
@@ -25,7 +26,7 @@ public:
         pnr = 0;
     }
 
-    // Constructor 2 - Constructor Overloading
+    // Parameterized Constructor
     PassengerInfo(string passengerName, int passengerAge)
     {
         name = passengerName;
@@ -69,7 +70,7 @@ public:
 };
 
 
-// ************ PNR GENERATION ************
+// ================= PNR GENERATION =================
 
 int PNRnumber = 1001;
 
@@ -82,7 +83,7 @@ int generatePNR()
 }
 
 
-// ************ WAITING QUEUE ************
+// ================= WAITING QUEUE =================
 
 class WaitingList
 {
@@ -91,121 +92,313 @@ private:
 
     int front;
     int rear;
+    int count;
 
 public:
 
     WaitingList()
     {
-        front = -1;
+        front = 0;
         rear = -1;
+        count = 0;
     }
 
     bool isEmpty()
     {
-        if (front == -1)
-            return true;
-        else
-            return false;
+        return count == 0;
     }
 
     bool isFull()
     {
-        if (rear == MAX_WAITING - 1)
-            return true;
-        else
-            return false;
+        return count == MAX_WAITING;
     }
 
     // Enqueue
-    void enqueue(PassengerInfo passenger)
+    bool enqueue(PassengerInfo passenger)
     {
         if (isFull())
         {
-            cout << "Waiting list is full." << endl;
-            return;
+            return false;
         }
 
-        if (front == -1)
-        {
-            front = 0;
-        }
-
-        rear++;
+        rear = (rear + 1) % MAX_WAITING;
         waitingList[rear] = passenger;
+        count++;
 
-        cout << "PassengerInfo added to waiting list." << endl;
+        return true;
     }
 
     // Dequeue
     PassengerInfo dequeue()
     {
-        PassengerInfo emptyPassenger;
+        PassengerInfo passenger;
 
         if (isEmpty())
         {
-            return emptyPassenger;
+            return passenger;
         }
 
-        PassengerInfo passenger = waitingList[front];
+        passenger = waitingList[front];
 
-        if (front == rear)
+        front = (front + 1) % MAX_WAITING;
+        count--;
+
+        if (count == 0)
         {
-            front = -1;
+            front = 0;
             rear = -1;
-        }
-        else
-        {
-            front++;
         }
 
         return passenger;
+    }
+
+    // Search and remove passenger from waiting list
+    bool removeByPNR(int pnr)
+    {
+        PassengerInfo temp[MAX_WAITING];
+        int tempCount = 0;
+        bool found = false;
+
+        while (!isEmpty())
+        {
+            PassengerInfo passenger = dequeue();
+
+            if (passenger.getPNR() == pnr)
+            {
+                found = true;
+            }
+            else
+            {
+                temp[tempCount] = passenger;
+                tempCount++;
+            }
+        }
+
+        for (int i = 0; i < tempCount; i++)
+        {
+            enqueue(temp[i]);
+        }
+
+        return found;
     }
 
     void displayQueue()
     {
         if (isEmpty())
         {
-            cout << "Waiting list is empty." << endl;
+            cout << "\nWaiting list is empty." << endl;
             return;
         }
 
-        cout << "\n***** WAITING LIST *****" << endl;
+        cout << "\n===== WAITING LIST =====" << endl;
 
-        for (int i = front; i <= rear; i++)
+        int i = front;
+
+        for (int j = 0; j < count; j++)
         {
-            cout << "\nPassenger " << i - front + 1 << endl;
+            cout << "\nPassenger " << j + 1 << endl;
             waitingList[i].display();
+
+            i = (i + 1) % MAX_WAITING;
         }
     }
 };
 
 
-// ************ MAIN ************
+// ================= HASH TABLE =================
+
+class HashTable
+{
+private:
+
+    struct Record
+    {
+        int pnr;
+        PassengerInfo passenger;
+        int status;
+        int state;
+    };
+
+    Record table[TABLE_SIZE];
+
+public:
+
+    HashTable()
+    {
+        for (int i = 0; i < TABLE_SIZE; i++)
+        {
+            table[i].state = 0;
+            table[i].status = 0;
+            table[i].pnr = 0;
+        }
+    }
+
+    // Hash Function
+    int hashFunction(int pnr)
+    {
+        return pnr % TABLE_SIZE;
+    }
+
+    // Insert passenger into hash table
+    bool insert(PassengerInfo passenger, int status)
+    {
+        int index = hashFunction(passenger.getPNR());
+        int firstDeleted = -1;
+
+        for (int i = 0; i < TABLE_SIZE; i++)
+        {
+            int position = (index + i) % TABLE_SIZE;
+
+            if (table[position].state == 1 &&
+                table[position].pnr == passenger.getPNR())
+            {
+                return false;
+            }
+
+            if (table[position].state == 2 && firstDeleted == -1)
+            {
+                firstDeleted = position;
+            }
+
+            if (table[position].state == 0)
+            {
+                if (firstDeleted != -1)
+                {
+                    position = firstDeleted;
+                }
+
+                table[position].pnr = passenger.getPNR();
+                table[position].passenger = passenger;
+                table[position].status = status;
+                table[position].state = 1;
+
+                return true;
+            }
+        }
+
+        if (firstDeleted != -1)
+        {
+            table[firstDeleted].pnr = passenger.getPNR();
+            table[firstDeleted].passenger = passenger;
+            table[firstDeleted].status = status;
+            table[firstDeleted].state = 1;
+
+            return true;
+        }
+
+        return false;
+    }
+
+    // Search PNR
+    int search(int pnr)
+    {
+        int index = hashFunction(pnr);
+
+        for (int i = 0; i < TABLE_SIZE; i++)
+        {
+            int position = (index + i) % TABLE_SIZE;
+
+            if (table[position].state == 0)
+            {
+                return -1;
+            }
+
+            if (table[position].state == 1 &&
+                table[position].pnr == pnr)
+            {
+                return position;
+            }
+        }
+
+        return -1;
+    }
+
+    // Delete PNR
+    void remove(int pnr)
+    {
+        int position = search(pnr);
+
+        if (position != -1)
+        {
+            table[position].state = 2;
+        }
+    }
+
+    // Update passenger status
+    void updateStatus(int pnr, int status)
+    {
+        int position = search(pnr);
+
+        if (position != -1)
+        {
+            table[position].status = status;
+        }
+    }
+
+    // Display passenger using PNR
+    void displayPassenger(int pnr)
+    {
+        int position = search(pnr);
+
+        if (position == -1)
+        {
+            cout << "\nPNR not found." << endl;
+            return;
+        }
+
+        cout << "\n===== PASSENGER DETAILS =====" << endl;
+
+        table[position].passenger.display();
+
+        if (table[position].status == 1)
+        {
+            cout << "Status: Confirmed" << endl;
+        }
+        else
+        {
+            cout << "Status: Waiting" << endl;
+        }
+    }
+
+    int getStatus(int pnr)
+    {
+        int position = search(pnr);
+
+        if (position == -1)
+        {
+            return 0;
+        }
+
+        return table[position].status;
+    }
+};
 
 int main()
 {
-    PassengerInfo confirmedList[TOTAL_SEATS];
+    PassengerInfo confirmedPassengers[TOTAL_SEATS];
 
-    int bookedSeats = 0;
+    int confirmedCount = 0;
 
     WaitingList waitingQueue;
+    HashTable hashTable;
 
     int choice;
 
     do
     {
-        cout << "\n********** RAILWAY RESERVATION **********" << endl;
+        cout << "\n========== RAILWAY RESERVATION ==========" << endl;
         cout << "1. Book Ticket" << endl;
         cout << "2. Cancel Ticket" << endl;
         cout << "3. Display Confirmed Bookings" << endl;
         cout << "4. Display Waiting List" << endl;
-        cout << "5. Exit" << endl;
+        cout << "5. Search Passenger by PNR" << endl;
+        cout << "6. Exit" << endl;
 
         cout << "\nEnter your choice: ";
         cin >> choice;
 
 
-        // ************ BOOK TICKET ************
+        // ================= BOOK TICKET =================
 
         if (choice == 1)
         {
@@ -218,33 +411,44 @@ int main()
             cout << "Enter passenger age: ";
             cin >> age;
 
-            PassengerInfo passenger(name, age);
-
-            int pnr = generatePNR();
-            passenger.setPNR(pnr);
-
-
-            // Check seat availability
-            if (bookedSeats < TOTAL_SEATS)
+            // Check waiting list capacity first
+            if (confirmedCount == TOTAL_SEATS &&
+                waitingQueue.isFull())
             {
-                confirmedList[bookedSeats] = passenger;
-                bookedSeats++;
-
-                cout << "\nBooking Confirmed!" << endl;
-                cout << "PNR: " << pnr << endl;
+                cout << "\nNo seats or waiting-list spaces available." << endl;
             }
             else
             {
-                waitingQueue.enqueue(passenger);
+                PassengerInfo passenger(name, age);
 
-                cout << "No seats available." << endl;
-                cout << "PassengerInfo added to waiting list." << endl;
-                cout << "PNR: " << pnr << endl;
+                int pnr = generatePNR();
+                passenger.setPNR(pnr);
+
+                if (confirmedCount < TOTAL_SEATS)
+                {
+                    confirmedPassengers[confirmedCount] = passenger;
+                    confirmedCount++;
+
+                    hashTable.insert(passenger, 1);
+
+                    cout << "\nBooking Confirmed!" << endl;
+                    cout << "PNR: " << pnr << endl;
+                }
+                else
+                {
+                    if (waitingQueue.enqueue(passenger))
+                    {
+                        hashTable.insert(passenger, 2);
+
+                        cout << "\nPassenger added to waiting list." << endl;
+                        cout << "PNR: " << pnr << endl;
+                    }
+                }
             }
         }
 
 
-        // ************ CANCEL TICKET ************
+        // ================= CANCEL TICKET =================
 
         else if (choice == 2)
         {
@@ -253,82 +457,98 @@ int main()
             cout << "\nEnter PNR to cancel: ";
             cin >> cancelPNR;
 
-            int found = -1;
+            int position = hashTable.search(cancelPNR);
 
-            // Find confirmed passenger
-            for (int i = 0; i < bookedSeats; i++)
+            if (position == -1)
             {
-                if (confirmedList[i].getPNR() == cancelPNR)
-                {
-                    found = i;
-                    break;
-                }
-            }
-
-
-            if (found == -1)
-            {
-                cout << "PNR not found in confirmed bookings." << endl;
+                cout << "\nPNR not found." << endl;
             }
             else
             {
-                cout << "\nBooking cancelled for: "
-                     << confirmedList[found].getName()
-                     << endl;
+                int status = hashTable.getStatus(cancelPNR);
 
-
-                // Move remaining passengers one position left
-                for (int i = found; i < bookedSeats - 1; i++)
+                // Cancel confirmed ticket
+                if (status == 1)
                 {
-                    confirmedList[i] = confirmedList[i + 1];
+                    int found = -1;
+
+                    for (int i = 0; i < confirmedCount; i++)
+                    {
+                        if (confirmedPassengers[i].getPNR() == cancelPNR)
+                        {
+                            found = i;
+                            break;
+                        }
+                    }
+
+                    if (found != -1)
+                    {
+                        cout << "\nBooking cancelled for: "
+                             << confirmedPassengers[found].getName()
+                             << endl;
+
+                        for (int i = found; i < confirmedCount - 1; i++)
+                        {
+                            confirmedPassengers[i] = confirmedPassengers[i + 1];
+                        }
+
+                        confirmedCount--;
+
+                        hashTable.remove(cancelPNR);
+
+                        // Confirm first waiting passenger
+                        if (!waitingQueue.isEmpty())
+                        {
+                            PassengerInfo nextPassenger = waitingQueue.dequeue();
+
+                            confirmedPassengers[confirmedCount] = nextPassenger;
+                            confirmedCount++;
+
+                            hashTable.updateStatus(nextPassenger.getPNR(), 1);
+
+                            cout << "\nWaiting passenger is now confirmed!" << endl;
+                            cout << "Name: " << nextPassenger.getName() << endl;
+                            cout << "PNR: " << nextPassenger.getPNR() << endl;
+                        }
+                    }
                 }
 
-                bookedSeats--;
-
-
-                // Check waiting list
-                if (!waitingQueue.isEmpty())
+                // Cancel waiting-list ticket
+                else if (status == 2)
                 {
-                    PassengerInfo nextPassenger = waitingQueue.dequeue();
+                    if (waitingQueue.removeByPNR(cancelPNR))
+                    {
+                        hashTable.remove(cancelPNR);
 
-                    confirmedList[bookedSeats] = nextPassenger;
-                    bookedSeats++;
-
-                    cout << "\nWaiting passenger is now confirmed!" << endl;
-                    cout << "Name: "
-                         << nextPassenger.getName()
-                         << endl;
-
-                    cout << "PNR: "
-                         << nextPassenger.getPNR()
-                         << endl;
+                        cout << "\nWaiting-list ticket cancelled." << endl;
+                    }
                 }
             }
         }
 
 
-        // ************ DISPLAY CONFIRMED BOOKINGS ************
+        // ================= DISPLAY CONFIRMED =================
 
         else if (choice == 3)
         {
-            if (bookedSeats == 0)
+            if (confirmedCount == 0)
             {
                 cout << "\nNo confirmed bookings." << endl;
             }
             else
             {
-                cout << "\n***** CONFIRMED BOOKINGS *****" << endl;
+                cout << "\n===== CONFIRMED BOOKINGS =====" << endl;
 
-                for (int i = 0; i < bookedSeats; i++)
+                for (int i = 0; i < confirmedCount; i++)
                 {
                     cout << "\nPassenger " << i + 1 << endl;
-                    confirmedList[i].display();
+                    confirmedPassengers[i].display();
                 }
             }
         }
 
 
-        // ************ DISPLAY WAITING LIST ************
+        // ================= DISPLAY WAITING =================
 
         else if (choice == 4)
         {
@@ -336,21 +556,33 @@ int main()
         }
 
 
-        // ************ EXIT ************
+        // ================= SEARCH BY PNR =================
 
         else if (choice == 5)
         {
-            cout << "\nProgram ended." << endl;
+            int searchPNR;
+
+            cout << "\nEnter PNR to search: ";
+            cin >> searchPNR;
+
+            hashTable.displayPassenger(searchPNR);
         }
 
+
+        // ================= EXIT =================
+
+        else if (choice == 6)
+        {
+            cout << "\nProgram ended." << endl;
+        }
 
         else
         {
             cout << "\nInvalid choice." << endl;
         }
 
-    } while (choice != 5);
-
+    } while (choice != 6);
 
     return 0;
 }
+
