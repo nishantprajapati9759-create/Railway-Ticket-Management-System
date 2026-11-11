@@ -1,0 +1,17 @@
+15014 Ranikhet_Express Delhi Moradabad 160
+15014 Ranikhet_Express Moradabad Kashipur 55
+15014 Ranikhet_Express Kashipur Kathgodam 65
+12040 Kathgodam_Shatabdi Delhi Ghaziabad 25
+12040 Kathgodam_Shatabdi Ghaziabad Moradabad 135
+12040 Kathgodam_Shatabdi Moradabad Rampur 28
+12040 Kathgodam_Shatabdi Rampur Haldwani 55
+12040 Kathgodam_Shatabdi Haldwani Kathgodam 6
+12018 Dehradun_Shatabdi Delhi Meerut 67
+12018 Dehradun_Shatabdi Meerut Saharanpur 114
+12018 Dehradun_Shatabdi Saharanpur Haridwar 52
+12018 Dehradun_Shatabdi Haridwar Dehradun 52
+12230 Lucknow_Mail Moradabad Bareilly 90
+12230 Lucknow_Mail Bareilly Shahjahanpur 71
+12230 Lucknow_Mail Shahjahanpur Lucknow 165
+14120 Kathgodam_Dehradun_Exp Kashipur Najibabad 98
+14120 Kathgodam_Dehradun_Exp Najibabad Haridwar 47
