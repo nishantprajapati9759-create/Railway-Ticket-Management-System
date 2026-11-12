@@ -406,7 +406,8 @@ int main()
             int age;
 
             cout << "\nEnter passenger name: ";
-            cin >> name;
+            cin.ignore();
+            getline(cin,name);
 
             cout << "Enter passenger age: ";
             cin >> age;
