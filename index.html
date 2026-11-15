@@ -1,0 +1,783 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Indian Railways - Online Ticket Reservation</title>
+  <style>
+    :root {
+      --navy: #0f2547;
+      --blue: #1d4ed8;
+      --saffron: #ea580c;
+      --emerald: #15803d;
+      --crimson: #b91c1c;
+      --slate: #475569;
+      --bg: #f1f5f9;
+    }
+    * { box-sizing: border-box; font-family: 'Segoe UI', system-ui, sans-serif; }
+    body { margin: 0; background: var(--bg); color: #0f172a; min-height: 100vh; }
+    .hidden { display: none !important; }
+
+    /* PAGE 1: HERO LOGIN SCREEN WITH TRAIN BACKGROUND */
+        #page-login {
+      min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 24px;
+      background-color: #0b1d3a;
+      background-image:
+        linear-gradient(125deg, rgba(8, 22, 48, 0.86) 0%, rgba(19, 48, 96, 0.76) 55%, rgba(180, 65, 12, 0.72) 100%),
+        url("data:image/svg+xml,%3Csvg xmlns='http://w3.org' viewBox='0 0 1440 600'%3E%3Cdefs%3E%3ClinearGradient id='sky' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0%25' stop-color='%230f2547'/%3E%3Cstop offset='55%25' stop-color='%231e3a8a'/%3E%3Cstop offset='100%25' stop-color='%23ea580c'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='1440' height='600' fill='url(%23sky)'/%3E%3Ccircle cx='1160' cy='150' r='90' fill='%23fdba74' opacity='0.28'/%3E%3Cpath d='M0 440 L320 260 L640 420 L980 230 L1440 430 L1440 600 L0 600 Z' fill='%2309162e' opacity='0.75'/%3E%3Crect x='0' y='475' width='1440' height='125' fill='%23060f1f'/%3E%3Crect x='0' y='472' width='1440' height='6' fill='%2394a3b8' opacity='0.5'/%3E%3Cg transform='translate(110,335)'%3E%3Crect x='0' y='25' width='290' height='110' rx='12' fill='%231d4ed8' stroke='%2393c5fd' stroke-width='2'/%3E%3Crect x='0' y='72' width='290' height='16' fill='%23ea580c'/%3E%3Crect x='305' y='25' width='290' height='110' rx='12' fill='%231d4ed8' stroke='%2393c5fd' stroke-width='2'/%3E%3Crect x='305' y='72' width='290' height='16' fill='%23ea580c'/%3E%3Cpath d='M610 25 L830 25 Q905 25 935 95 L945 135 L610 135 Z' fill='%23f8fafc' stroke='%23cbd5e1' stroke-width='2'/%3E%3Cpath d='M610 78 L938 78 L945 102 L610 102 Z' fill='%23ea580c'/%3E%3Cpath d='M815 36 L885 36 Q908 55 918 72 L815 72 Z' fill='%230f172a'/%3E%3Ccircle cx='936' cy='115' r='10' fill='%23fef08a'/%3E%3Cpolygon points='946,115 1320,60 1320,175' fill='%23fef08a' opacity='0.22'/%3E%3C/g%3E%3C/svg%3E");
+      background-size: cover;
+      background-position: center;
+    }
+
+    .login-wrapper { width: 100%; max-width: 980px; display: grid; grid-template-columns: 1.15fr 0.95fr; gap: 36px; align-items: center; }
+    .hero-copy { color: #fff; }
+    .hero-pill { display: inline-block; background: rgba(255,255,255,0.16); border: 1px solid rgba(255,255,255,0.32); padding: 6px 14px; border-radius: 999px; font-size: 12px; font-weight: 700; letter-spacing: 0.5px; margin-bottom: 16px; }
+    .hero-copy h1 { font-size: 38px; line-height: 1.18; margin: 0 0 14px; font-weight: 800; }
+    .hero-copy p { font-size: 15px; line-height: 1.65; color: #e2e8f0; margin: 0 0 24px; }
+    .feature-pills { display: flex; flex-wrap: wrap; gap: 8px; }
+    .feature-pill { background: rgba(15,37,71,0.75); border: 1px solid rgba(255,255,255,0.22); color: #f8fafc; padding: 6px 12px; border-radius: 8px; font-size: 12px; font-weight: 600; }
+    .auth-card { background: rgba(255,255,255,0.97); border-radius: 16px; box-shadow: 0 20px 50px rgba(0,0,0,0.38); overflow: hidden; }
+    .auth-header { background: var(--navy); color: #fff; padding: 20px 24px; text-align: center; }
+    .auth-header h2 { margin: 0; font-size: 19px; }
+    .auth-header span { font-size: 12px; color: #cbd5e1; }
+    .auth-tabs { display: flex; border-bottom: 1px solid #e2e8f0; }
+    .auth-tab { flex: 1; padding: 13px; border: none; background: #f8fafc; color: #64748b; font-weight: 700; font-size: 14px; cursor: pointer; border-bottom: 3px solid transparent; }
+    .auth-tab.active { background: #fff; color: var(--navy); border-bottom-color: var(--saffron); }
+    .auth-body { padding: 24px; }
+    .field-label { display: block; font-size: 13px; font-weight: 700; color: #334155; margin-bottom: 6px; }
+    .field-input { width: 100%; padding: 11px 13px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px; margin-bottom: 14px; outline: none; }
+
+    /* TOP NAVBAR */
+    .topbar { background: linear-gradient(90deg, var(--navy), #1e3a8a); color: #fff; padding: 14px 28px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 14px rgba(15,23,42,0.14); position: sticky; top: 0; z-index: 100; }
+    .brand { display: flex; align-items: center; gap: 12px; cursor: pointer; }
+    .brand-icon { width: 36px; height: 36px; background: var(--saffron); border-radius: 9px; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 18px; }
+    .brand-title { font-size: 18px; font-weight: 800; }
+    .nav-right { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+    .pill-status { background: rgba(255,255,255,0.15); padding: 6px 13px; border-radius: 999px; font-size: 12px; font-weight: 700; }
+    .pill-status.online { background: var(--emerald); }
+    .btn-logout { background: #ef4444; color: #fff; border: none; padding: 7px 14px; border-radius: 8px; font-weight: 700; font-size: 13px; cursor: pointer; }
+
+    /* PAGE 2: SERVICE SELECTION HUB */
+    .hub-container { max-width: 1060px; margin: 36px auto; padding: 0 22px; }
+    .welcome-banner { background: linear-gradient(135deg, #1e3a8a, #0f2547); color: #fff; padding: 28px 32px; border-radius: 16px; margin-bottom: 28px; box-shadow: 0 10px 25px rgba(15,37,71,0.16); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; }
+    .welcome-banner h2 { margin: 0 0 6px; font-size: 24px; }
+    .welcome-banner p { margin: 0; color: #cbd5e1; font-size: 14px; }
+    .services-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 22px; }
+    .service-tile { background: #fff; border-radius: 16px; padding: 26px; border: 2px solid transparent; box-shadow: 0 6px 18px rgba(15,23,42,0.06); cursor: pointer; transition: all 0.2s ease; display: flex; gap: 18px; align-items: flex-start; }
+    .service-tile:hover { transform: translateY(-4px); border-color: var(--blue); box-shadow: 0 14px 28px rgba(29,78,216,0.14); }
+    .tile-icon { width: 54px; height: 54px; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 26px; flex-shrink: 0; }
+    .tile-body h3 { margin: 0 0 6px; font-size: 18px; color: var(--navy); }
+    .tile-body p { margin: 0; font-size: 13.5px; color: var(--slate); line-height: 1.55; }
+
+    /* PAGE 3: SUB-PAGES */
+    .subpage-container { max-width: 1160px; margin: 26px auto; padding: 0 22px 40px; }
+    .subpage-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; flex-wrap: wrap; gap: 12px; }
+    .btn-back { background: #fff; color: var(--navy); border: 1px solid #cbd5e1; padding: 9px 16px; border-radius: 9px; font-weight: 700; font-size: 13.5px; cursor: pointer; }
+    .booking-layout { display: grid; grid-template-columns: 1.35fr 1fr; gap: 22px; }
+    .card { background: #fff; border-radius: 14px; padding: 22px 24px; box-shadow: 0 4px 16px rgba(15,23,42,0.06); margin-bottom: 20px; }
+    .card h3 { margin: 0 0 16px; font-size: 17px; color: var(--navy); border-bottom: 2px solid #f1f5f9; padding-bottom: 10px; }
+    .form-row { display: flex; gap: 10px; margin-bottom: 12px; flex-wrap: wrap; align-items: center; }
+    select, input { flex: 1; min-width: 130px; padding: 11px 13px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px; }
+    .btn-primary { background: var(--blue); color: #fff; border: none; padding: 11px 20px; border-radius: 8px; font-weight: 700; font-size: 14px; cursor: pointer; }
+    .btn-saffron { background: var(--saffron); color: #fff; border: none; padding: 13px 20px; border-radius: 8px; font-weight: 700; font-size: 15px; width: 100%; cursor: pointer; }
+    .btn-danger { background: var(--crimson); color: #fff; border: none; padding: 11px 20px; border-radius: 8px; font-weight: 700; font-size: 14px; cursor: pointer; }
+    .route-card { border: 1.5px solid #cbd5e1; border-radius: 10px; padding: 13px 15px; margin-bottom: 10px; cursor: pointer; transition: 0.15s; }
+    .route-card:hover { border-color: var(--blue); background: #f8fafc; }
+    .route-card.selected { border-color: var(--blue); background: #eff6ff; }
+    .seat-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; background: #f8fafc; padding: 14px; border-radius: 10px; border: 1.5px dashed #cbd5e1; }
+    .seat { padding: 11px 6px; text-align: center; border-radius: 7px; font-weight: 700; font-size: 13px; color: #fff; cursor: pointer; user-select: none; }
+    .seat.avail { background: var(--emerald); }
+    .seat.booked { background: var(--crimson); cursor: not-allowed; opacity: 0.85; }
+    .seat.selected { background: var(--blue); box-shadow: 0 0 0 3px #93c5fd; }
+    .pax-badge { background: #eff6ff; color: var(--blue); font-weight: 700; font-size: 12px; padding: 6px 10px; border-radius: 6px; min-width: 72px; text-align: center; }
+    .result-banner { margin-top: 14px; padding: 14px; border-radius: 10px; font-size: 14px; line-height: 1.6; display: none; }
+    .coach-banner { background: linear-gradient(90deg, #0f2547, #1e3a8a); color: #fff; padding: 10px 14px; border-radius: 9px; font-size: 12.5px; font-weight: 700; display: flex; justify-content: space-between; margin-bottom: 12px; }
+.eticket-box { border: 2px dashed #15803d; background: #f0fdf4; border-radius: 12px; padding: 14px 16px; }
+.eticket-tag { display: inline-block; background: #15803d; color: #fff; font-size: 11px; font-weight: 800; padding: 3px 9px; border-radius: 5px; margin-bottom: 6px; letter-spacing: 0.5px; }
+
+    @media (max-width: 860px) { .login-wrapper, .services-grid, .booking-layout { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+<script>
+const STATIONS = ["Delhi", "Ghaziabad", "Moradabad", "Kashipur", "Kathgodam", "Haridwar", "Dehradun", "Bareilly", "Lucknow"];
+var selectedRoute = null;
+var selectedSeats = [];
+
+function el(tag, attrs, children) {
+  var node = document.createElement(tag);
+  if (attrs) {
+    Object.keys(attrs).forEach(function(k) {
+      if (k === 'className') node.className = attrs[k];
+      else if (k === 'text') node.textContent = attrs[k];
+      else if (k === 'style') node.style.cssText = attrs[k];
+      else if (k.startsWith('on')) node[k] = attrs[k];
+      else node.setAttribute(k, attrs[k]);
+    });
+  }
+  if (children) {
+    children.forEach(function(c) {
+      if (typeof c === 'string') node.appendChild(document.createTextNode(c));
+      else if (c) node.appendChild(c);
+    });
+  }
+  return node;
+}
+
+function makeSelect(id, prefix, defVal) {
+  var opts = STATIONS.map(function(st) {
+    var o = el('option', { value: st, text: prefix + ': ' + st });
+    if (st === defVal) o.selected = true;
+    return o;
+  });
+  return el('select', { id: id }, opts);
+}
+
+/* PAGE 1: LOGIN */
+var pageLogin = el('section', { id: 'page-login' }, [
+  el('div', { className: 'login-wrapper' }, [
+    el('div', { className: 'hero-copy' }, [
+      el('div', { className: 'hero-pill', text: 'INDIAN RAILWAYS • ONLINE RESERVATION PORTAL' }),
+      el('h1', { text: 'Fast, Reliable & Seamless Train Ticket Booking' }),
+      el('p', { text: 'Search direct and connecting express trains, choose your preferred coach seats from the live layout, check real-time PNR status, and manage cancellations effortlessly.' }),
+      el('div', { className: 'feature-pills' }, [
+
+el('span', { className: 'feature-pill', text: 'Live Coach Seat Map' }),
+el('span', { className: 'feature-pill', text: 'Multi-Seat Group Booking' }),
+el('span', { className: 'feature-pill', text: 'Instant PNR Enquiry' }),
+el('span', { className: 'feature-pill', text: 'Auto Waitlist Upgrade' })
+])
+]),
+el('div', { className: 'auth-card' }, [
+el('div', { className: 'auth-header' }, [
+el('h2', { text: 'Passenger Portal Login' }),
+el('span', { text: 'Sign in or create an account to book tickets' })
+]),
+el('div', { className: 'auth-tabs' }, [
+el('button', { id: 'tabLoginBtn', className: 'auth-tab active', text: 'Sign In', onclick: function() { switchAuthTab('login'); } }),
+el('button', { id: 'tabRegBtn', className: 'auth-tab', text: 'Create Account', onclick: function() { switchAuthTab('register'); } })
+]),
+el('div', { id: 'loginFormBox', className: 'auth-body' }, [
+el('label', { className: 'field-label', text: 'Username' }),
+el('input', { id: 'loginUser', className: 'field-input', type: 'text', placeholder: 'Enter your username' }),
+el('label', { className: 'field-label', text: 'Password' }),
+el('input', { id: 'loginPass', className: 'field-input', type: 'password', placeholder: 'Enter your password' }),
+el('button', { className: 'btn-saffron', text: 'Login to Portal →', onclick: submitLogin })
+]),
+el('div', { id: 'regFormBox', className: 'auth-body hidden' }, [
+el('label', { className: 'field-label', text: 'Choose Username (no spaces)' }),
+el('input', { id: 'regUser', className: 'field-input', type: 'text', placeholder: 'e.g., ananya_verma' }),
+el('label', { className: 'field-label', text: 'Create Password (min 8 chars)' }),
+el('input', { id: 'regPass', className: 'field-input', type: 'password', placeholder: 'Minimum 8 characters' }),
+el('label', { className: 'field-label', text: 'Confirm Password' }),
+el('input', { id: 'regConfirm', className: 'field-input', type: 'password', placeholder: 'Re-enter password' }),
+el('button', { className: 'btn-primary', style: 'width:100%; padding:13px; background:var(--emerald);', text: 'Register & Continue →', onclick: submitRegister })
+]),
+el('div', { id: 'authMsg', style: 'padding:0 24px 18px; font-size:13px; font-weight:700; text-align:center;' })
+])
+])
+]);
+/* APP SHELL */
+function makeTile(icon, bg, fg, title, desc, view) {
+return el('div', { className: 'service-tile', onclick: function() { navigateTo(view); } }, [
+el('div', { className: 'tile-icon', style: 'background:' + bg + '; color:' + fg + ';', text: icon }),
+el('div', { className: 'tile-body' }, [
+el('h3', { text: title }),
+el('p', { text: desc })
+])
+]);
+}
+var appShell = el('div', { id: 'app-shell', className: 'hidden' }, [
+el('header', { className: 'topbar' }, [
+el('div', { className: 'brand', onclick: function() { navigateTo('hub'); } }, [
+el('div', { className: 'brand-icon', text: 'IR' }),
+el('div', { className: 'brand-title', text: 'INDIAN RAILWAYS' })
+]),
+el('div', { className: 'nav-right' }, [
+el('span', { id: 'engineStatus', className: 'pill-status', text: 'Connecting Server...' }),
+el('span', { className: 'pill-status' }, ['Welcome, ', el('strong', { id: 'activeUserLabel', text: 'Passenger' })]),
+el('button', { className: 'btn-logout', text: 'Logout', onclick: logoutUser })
+])
+]),
+/* HUB */
+el('section', { id: 'view-hub', className: 'hub-container' }, [
+el('div', { className: 'welcome-banner' }, [
+el('div', {}, [
+el('h2', {}, ['Namaste, ', el('span', { id: 'welcomeUser', text: 'Passenger' }), '! How can we help you today?']),
+el('p', { text: 'Choose a railway service below to book tickets, check PNR status, or explore routes.' })
+])
+]),
+el('div', { className: 'services-grid' }, [
+makeTile('🎫', '#fff7ed', '#ea580c', 'Book Train Ticket', 'Search direct or connecting trains, select one or multiple seats from the live coach layout, and generate e-tickets.', 'book'),
+makeTile('🔍', '#eff6ff', '#1d4ed8', 'PNR & Waiting List Enquiry', 'Enter your PNR number to check live confirmation status or current waiting list position.', 'pnr'),
+makeTile('❌', '#fef2f2', '#b91c1c', 'Cancel Ticket', 'Cancel an existing reservation to release the seat and automatically confirm the next waiting list passenger.', 'cancel'),
+makeTile('🗺️', '#f0fdf4', '#15803d', 'Train Schedule & Routes', 'Check all available direct and connecting train routes, station stops, timings, and ticket fares.', 'routes')
+])
+]),
+/* BOOKING PAGE */
+el('section', { id: 'view-book', className: 'subpage-container hidden' }, [
+el('div', { className: 'subpage-header' }, [
+el('button', { className: 'btn-back', text: '← Back to Services', onclick: function() { navigateTo('hub'); } }),
+el('h2', { style: 'margin:0; color:var(--navy);', text: 'Book Train Ticket' })
+]),
+el('div', { className: 'booking-layout' }, [
+el('div', {}, [
+el('div', { className: 'card' }, [
+el('h3', { text: 'Step 1: Select Stations & Train' }),
+el('div', { className: 'form-row' }, [
+makeSelect('srcSelect', 'From', 'Delhi'),
+makeSelect('destSelect', 'To', 'Kathgodam'),
+el('button', { className: 'btn-primary', text: 'Search Trains', onclick: searchTrains })
+]),
+el('div', { id: 'routesList', text: 'Loading available trains...' })
+]),
+el('div', { className: 'card' }, [
+el('h3', { text: 'Step 3: Passenger Details & E-Ticket' }),
+el('p', { style: 'font-size:13.5px; margin:0 0 12px; color:var(--slate);' }, [
+el('strong', { text: 'Selected Train: ' }), el('span', { id: 'selTrainLabel', text: 'None' }),
+'   |   ',
+el('strong', { text: 'Selected Seats: ' }), el('span', { id: 'selSeatLabel', text: 'Auto-Assign / Waitlist (1 Ticket)' })
+]),
+el('div', { id: 'passengerInputsBox' }),
+el('button', { className: 'btn-saffron', text: 'Confirm Booking & Generate E-Ticket', onclick: bookTicket }),
+el('div', { id: 'ticketResult', className: 'result-banner' })
+])
+]),
+el('div', {}, [
+el('div', { className: 'card' }, [
+el('h3', { text: 'Step 2: Coach S1 Seat Map (Click multiple seats for group booking)' }),
+el('div', { className: 'coach-banner' }, [
+  el('span', { text: '◀ GUARD CABIN' }),
+  el('span', { text: 'SLEEPER CLASS • COACH S1' }),
+  el('span', { text: 'ENGINE ▶' })
+]),
+
+el('div', { style: 'font-size:13px; color:var(--slate); margin-bottom:12px; display:flex; gap:14px;' }, [
+el('span', {}, [el('strong', { style: 'color:var(--emerald);', text: '■ ' }), 'Available']),
+el('span', {}, [el('strong', { style: 'color:var(--crimson);', text: '■ ' }), 'Booked']),
+el('span', {}, [el('strong', { style: 'color:var(--blue);', text: '■ ' }), 'Selected'])
+]),
+el('div', { id: 'seatGrid', className: 'seat-grid', text: 'Loading coach seats...' })
+])
+])
+])
+]),
+/* PNR PAGE */
+el('section', { id: 'view-pnr', className: 'subpage-container hidden' }, [
+el('div', { className: 'subpage-header' }, [
+el('button', { className: 'btn-back', text: '← Back to Services', onclick: function() { navigateTo('hub'); } }),
+el('h2', { style: 'margin:0; color:var(--navy);', text: 'PNR Status Enquiry' })
+]),
+el('div', { className: 'card', style: 'max-width:640px; margin:0 auto;' }, [
+el('h3', { text: 'Check Current Reservation Status' }),
+el('p', { style: 'font-size:13.5px; color:var(--slate); margin-top:0;', text: 'Enter your PNR number below to view passenger details, coach seat allocation, or waiting list status.' }),
+el('div', { className: 'form-row' }, [
+el('input', { id: 'pnrInput', type: 'number', placeholder: 'Enter PNR Number' }),
+el('button', { className: 'btn-primary', text: 'Get PNR Status', onclick: checkPNR })
+]),
+el('div', { id: 'pnrResult', className: 'result-banner' })
+])
+]),
+/* CANCEL PAGE */
+el('section', { id: 'view-cancel', className: 'subpage-container hidden' }, [
+el('div', { className: 'subpage-header' }, [
+el('button', { className: 'btn-back', text: '← Back to Services', onclick: function() { navigateTo('hub'); } }),
+el('h2', { style: 'margin:0; color:var(--navy);', text: 'Cancel Reservation' })
+]),
+el('div', { className: 'card', style: 'max-width:640px; margin:0 auto;' }, [
+el('h3', { text: 'Cancel Booked Ticket' }),
+el('p', { style: 'font-size:13.5px; color:var(--slate); margin-top:0;', text: 'Enter the PNR number of the ticket you wish to cancel.' }),
+el('div', { className: 'form-row' }, [
+el('input', { id: 'cancelPnrInput', type: 'number', placeholder: 'Enter PNR Number to Cancel' }),
+el('button', { className: 'btn-danger', text: 'Cancel Ticket', onclick: cancelPNR })
+]),
+el('div', { id: 'cancelResult', className: 'result-banner' })
+])
+]),
+/* ROUTES PAGE */
+el('section', { id: 'view-routes', className: 'subpage-container hidden' }, [
+el('div', { className: 'subpage-header' }, [
+el('button', { className: 'btn-back', text: '← Back to Services', onclick: function() { navigateTo('hub'); } }),
+el('h2', { style: 'margin:0; color:var(--navy);', text: 'Train Schedule & Network Routes' })
+]),
+el('div', { className: 'card', style: 'max-width:820px; margin:0 auto;' }, [
+el('h3', { text: 'Find Direct & Connecting Trains' }),
+el('div', { className: 'form-row' }, [
+makeSelect('expSrc', 'From', 'Delhi'),
+makeSelect('expDest', 'To', 'Kathgodam'),
+el('button', { className: 'btn-primary', text: 'Find Trains', onclick: exploreRoutes })
+]),
+el('div', { id: 'exploreList', text: 'Select stations and click Find Trains.' })
+])
+])
+]);
+document.body.appendChild(pageLogin);
+document.body.appendChild(appShell);
+function renderPassengerFields() {
+var box = document.getElementById('passengerInputsBox');
+if (!box) return;
+var existing = [];
+box.querySelectorAll('.pax-row').forEach(function(row) {
+existing.push({
+name: row.querySelector('.pax-name').value,
+age: row.querySelector('.pax-age').value
+});
+});
+box.innerHTML = '';
+var count = selectedSeats.length > 0 ? selectedSeats.length : 1;
+for (var i = 0; i < count; i++) {
+var seatTag = selectedSeats.length > 0 ? ('S1-' + selectedSeats[i]) : 'Passenger 1';
+var nameInp = el('input', { className: 'pax-name', type: 'text', placeholder: 'Passenger ' + (i + 1) + ' Full Name' });
+var ageInp = el('input', { className: 'pax-age', type: 'number', placeholder: 'Age', min: '1', max: '120', style: 'max-width:110px;' });
+if (existing[i]) {
+nameInp.value = existing[i].name;
+ageInp.value = existing[i].age;
+}
+box.appendChild(el('div', { className: 'form-row pax-row' }, [
+el('span', { className: 'pax-badge', text: seatTag }),
+nameInp,
+ageInp
+]));
+}
+}
+renderPassengerFields();
+function switchAuthTab(tab) {
+document.getElementById('authMsg').textContent = '';
+if (tab === 'login') {
+document.getElementById('loginFormBox').classList.remove('hidden');
+document.getElementById('regFormBox').classList.add('hidden');
+document.getElementById('tabLoginBtn').classList.add('active');
+document.getElementById('tabRegBtn').classList.remove('active');
+} else {
+document.getElementById('loginFormBox').classList.add('hidden');
+document.getElementById('regFormBox').classList.remove('hidden');
+document.getElementById('tabRegBtn').classList.add('active');
+document.getElementById('tabLoginBtn').classList.remove('active');
+}
+}
+function enterPortal(username) {
+document.getElementById('page-login').classList.add('hidden');
+document.getElementById('app-shell').classList.remove('hidden');
+document.getElementById('activeUserLabel').textContent = username;
+document.getElementById('welcomeUser').textContent = username;
+navigateTo('hub');
+loadSeats().then(function() { searchTrains(); });
+}
+function logoutUser() {
+document.getElementById('app-shell').classList.add('hidden');
+document.getElementById('page-login').classList.remove('hidden');
+document.getElementById('loginPass').value = '';
+document.getElementById('authMsg').textContent = '';
+}
+function navigateTo(viewName) {
+['view-hub', 'view-book', 'view-pnr', 'view-cancel', 'view-routes'].forEach(function(id) {
+document.getElementById(id).classList.add('hidden');
+});
+document.getElementById('view-' + viewName).classList.remove('hidden');
+if (viewName === 'pnr') {
+document.getElementById('pnrInput').value = '';
+document.getElementById('pnrResult').style.display = 'none';
+}
+if (viewName === 'cancel') {
+document.getElementById('cancelPnrInput').value = '';
+document.getElementById('cancelResult').style.display = 'none';
+}
+if (viewName === 'book') {
+  document.getElementById('ticketResult').style.display = 'none';
+  loadSeats();
+}
+
+if (viewName === 'routes') {
+exploreRoutes();
+}
+}
+function submitLogin() {
+var u = document.getElementById('loginUser').value.trim();
+var p = document.getElementById('loginPass').value;
+var msg = document.getElementById('authMsg');
+msg.style.color = '#1d4ed8';
+msg.textContent = 'Signing in...';
+fetch('/api/login?user=' + encodeURIComponent(u) + '&pass=' + encodeURIComponent(p))
+.then(function(r) { return r.json(); })
+.then(function(data) {
+if (data.success) { enterPortal(data.user); }
+else { msg.style.color = '#b91c1c'; msg.textContent = data.message; }
+})
+.catch(function() { msg.style.color = '#b91c1c'; msg.textContent = 'Server connection failed.'; });
+}
+function submitRegister() {
+var u = document.getElementById('regUser').value.trim();
+var p = document.getElementById('regPass').value;
+var c = document.getElementById('regConfirm').value;
+var msg = document.getElementById('authMsg');
+msg.style.color = '#15803d';
+msg.textContent = 'Creating account...';
+fetch('/api/register?user=' + encodeURIComponent(u) + '&pass=' + encodeURIComponent(p) + '&confirm=' + encodeURIComponent(c))
+.then(function(r) { return r.json(); })
+.then(function(data) {
+if (data.success) { enterPortal(data.user); }
+else { msg.style.color = '#b91c1c'; msg.textContent = data.message; }
+})
+.catch(function() { msg.style.color = '#b91c1c'; msg.textContent = 'Server connection failed.'; });
+}
+function updateSelectedSeatsLabel() {
+var lbl = document.getElementById('selSeatLabel');
+if (!lbl) return;
+if (selectedSeats.length === 0) {
+lbl.textContent = 'Auto-Assign / Waitlist (1 Ticket)';
+} else {
+lbl.textContent = selectedSeats.map(function(s) { return 'S1-' + s; }).join(', ') + ' (' + selectedSeats.length + ' Tickets)';
+}
+renderPassengerFields();
+}
+function loadSeats() {
+var tName = selectedRoute ? selectedRoute.train : 'DEFAULT';
+return fetch('/api/seats?train=' + encodeURIComponent(tName))
+.then(function(res) { return res.json(); })
+.then(function(data) {
+var badge = document.getElementById('engineStatus');
+badge.textContent = 'Server Online';
+badge.classList.add('online');
+var grid = document.getElementById('seatGrid');
+grid.innerHTML = '';
+data.seats.forEach(function(status, idx) {
+var seatNo = idx + 1;
+var isSel = selectedSeats.indexOf(seatNo) !== -1;
+var div = el('div', {
+className: 'seat ' + (status === 1 ? 'booked' : (isSel ? 'selected' : 'avail')),
+text: 'S1-' + seatNo
+});
+if (status === 0) {
+div.onclick = function() {
+var pos = selectedSeats.indexOf(seatNo);
+if (pos !== -1) selectedSeats.splice(pos, 1);
+else selectedSeats.push(seatNo);
+selectedSeats.sort(function(a, b) { return a - b; });
+updateSelectedSeatsLabel();
+loadSeats();
+};
+}
+grid.appendChild(div);
+});
+});
+}
+function renderRouteCard(r, isSelected, onClickFn) {
+return el('div', { className: 'route-card' + (isSelected ? ' selected' : ''), onclick: onClickFn }, [
+el('strong', { text: r.train }),
+el('span', { style: 'float:right; color:#15803d; font-weight:800;', text: 'Rs. ' + r.fare }),
+el('div', { style: 'font-size:13px; color:#475569; margin-top:4px;', text: 'Timing: ' + r.startTime + ' - ' + r.endTime + ' | Distance: ' + r.distance + ' km' }),
+el('div', { style: 'font-size:12px; color:#64748b; margin-top:2px;', text: 'Route: ' + r.path })
+]);
+}
+function searchTrains() {
+  document.getElementById('ticketResult').style.display = 'none';
+var src = document.getElementById('srcSelect').value;
+var dest = document.getElementById('destSelect').value;
+var list = document.getElementById('routesList');
+list.textContent = 'Searching trains...';
+fetch('/api/routes?src=' + encodeURIComponent(src) + '&dest=' + encodeURIComponent(dest))
+.then(function(res) { return res.json(); })
+.then(function(data) {
+list.innerHTML = '';
+if (!data.routes || data.routes.length === 0) {
+list.appendChild(el('p', { style: 'color:#b91c1c; font-weight:600;', text: 'No direct or connecting trains found between these stations.' }));
+selectedRoute = null;
+document.getElementById('selTrainLabel').textContent = 'None';
+return;
+}
+data.routes.forEach(function(r, idx) {
+var card = renderRouteCard(r, idx === 0, function() {
+document.querySelectorAll('#routesList .route-card').forEach(function(c) { c.classList.remove('selected'); });
+card.classList.add('selected');
+selectedRoute = r;
+selectedSeats = [];
+document.getElementById('ticketResult').style.display = 'none';
+document.getElementById('selTrainLabel').textContent = r.train;
+updateSelectedSeatsLabel();
+loadSeats();
+});
+list.appendChild(card);
+if (idx === 0) {
+selectedRoute = r;
+document.getElementById('selTrainLabel').textContent = r.train;
+loadSeats();
+}
+});
+});
+}
+function exploreRoutes() {
+var src = document.getElementById('expSrc').value;
+var dest = document.getElementById('expDest').value;
+var list = document.getElementById('exploreList');
+list.textContent = 'Finding routes...';
+fetch('/api/routes?src=' + encodeURIComponent(src) + '&dest=' + encodeURIComponent(dest))
+.then(function(res) { return res.json(); })
+.then(function(data) {
+list.innerHTML = '';
+if (!data.routes || data.routes.length === 0) {
+list.appendChild(el('p', { style: 'color:#b91c1c; font-weight:600;', text: 'No route found between ' + src + ' and ' + dest + '.' }));
+return;
+}
+data.routes.forEach(function(r) {
+var card = renderRouteCard(r, false, function() {
+document.getElementById('srcSelect').value = src;
+document.getElementById('destSelect').value = dest;
+selectedRoute = r;
+navigateTo('book');
+searchTrains();
+});
+list.appendChild(card);
+});
+});
+}
+function bookTicket() {
+  if (!selectedRoute) { alert('Please select a train first!'); return; }
+  var rows = document.querySelectorAll('#passengerInputsBox .pax-row');
+  var passengers = [];
+  for (var i = 0; i < rows.length; i++) {
+    var name = rows[i].querySelector('.pax-name').value.trim();
+    var age = rows[i].querySelector('.pax-age').value.trim();
+    if (!name || !age) {
+      alert('Please enter name and age for Passenger ' + (i + 1) + '!');
+      return;
+    }
+    passengers.push({
+      name: name,
+      age: age,
+      seat: selectedSeats.length > 0 ? selectedSeats[i] : 0
+    });
+  }
+
+  var requests = passengers.map(function(p) {
+    var url = '/api/book?name=' + encodeURIComponent(p.name) +
+              '&age=' + encodeURIComponent(p.age) +
+              '&src=' + encodeURIComponent(selectedRoute.src) +
+              '&dest=' + encodeURIComponent(selectedRoute.dest) +
+              '&train=' + encodeURIComponent(selectedRoute.train) +
+              '&timing=' + encodeURIComponent(selectedRoute.startTime + ' - ' + selectedRoute.endTime) +
+              '&seat=' + encodeURIComponent(p.seat) +
+              '&fare=' + encodeURIComponent(selectedRoute.fare);
+    return fetch(url).then(function(r) { return r.json(); });
+  });
+
+  Promise.all(requests).then(function(results) {
+    var box = document.getElementById('ticketResult');
+    box.innerHTML = '';
+    box.className = 'result-banner eticket-box';
+    box.style.display = 'block';
+    box.style.background = '#f0fdf4';
+    box.style.border = '2px dashed #15803d';
+    box.style.color = '#14532d';
+
+    box.appendChild(el('span', { className: 'eticket-tag', text: 'INDIAN RAILWAYS • CONFIRMED E-TICKET' }));
+    box.appendChild(el('br'));
+
+    results.forEach(function(data, idx) {
+      if (idx > 0) box.appendChild(el('hr', { style: 'border:0; border-top:1px dashed #86efac; margin:10px 0;' }));
+      if (data.success) {
+        box.appendChild(el('strong', { text: passengers[idx].name + ' — ' + data.message }));
+        box.appendChild(el('br'));
+        box.appendChild(document.createTextNode('PNR Number: '));
+        box.appendChild(el('strong', { text: String(data.pnr) }));
+        box.appendChild(document.createTextNode('   |   Coach/Seat: '));
+        box.appendChild(el('strong', { text: data.seat > 0 ? ('S1-' + data.seat) : 'WAITLISTED' }));
+      } else {
+        box.appendChild(el('strong', { style: 'color:#b91c1c;', text: passengers[idx].name + ': ' + data.message }));
+      }
+    });
+
+    selectedSeats = [];
+    updateSelectedSeatsLabel();
+    loadSeats();
+  });
+}
+
+function checkPNR() {
+var pnr = document.getElementById('pnrInput').value.trim();
+if (!pnr) { alert('Please enter a PNR number!'); return; }
+fetch('/api/pnr?pnr=' + encodeURIComponent(pnr))
+.then(function(res) { return res.json(); })
+.then(function(data) {
+var box = document.getElementById('pnrResult');
+box.innerHTML = '';
+box.style.display = 'block';
+if (!data.found) {
+box.style.background = '#fef2f2';
+box.style.border = '1px solid #fca5a5';
+box.style.color = '#991b1b';
+box.appendChild(el('strong', { text: 'PNR ' + pnr + ' not found!' }));
+} else {
+box.style.background = '#eff6ff';
+box.style.border = '1px solid #93c5fd';
+box.style.color = '#1e3a8a';
+box.appendChild(el('strong', { text: 'PNR ' + data.pnr + ' — Status: ' + data.status }));
+box.appendChild(el('br'));
+box.appendChild(document.createTextNode('Passenger: '));
+box.appendChild(el('strong', { text: data.name }));
+box.appendChild(document.createTextNode(' | Train: '));
+box.appendChild(el('strong', { text: data.train }));
+box.appendChild(document.createTextNode(' | Seat: '));
+box.appendChild(el('strong', { text: data.seat > 0 ? ('S1-' + data.seat) : 'Waiting List' }));
+}
+});
+}
+function cancelPNR() {
+var pnr = document.getElementById('cancelPnrInput').value.trim();
+if (!pnr) { alert('Please enter a PNR number to cancel!'); return; }
+fetch('/api/cancel?pnr=' + encodeURIComponent(pnr))
+.then(function(res) { return res.json(); })
+.then(function(data) {
+var box = document.getElementById('cancelResult');
+box.innerHTML = '';
+box.style.display = 'block';
+if (data.success) {
+box.style.background = '#f0fdf4';
+box.style.border = '1px solid #86efac';
+box.style.color = '#14532d';
+} else {
+box.style.background = '#fef2f2';
+box.style.border = '1px solid #fca5a5';
+box.style.color = '#991b1b';
+}
+box.appendChild(el('strong', { text: data.message }));
+loadSeats();
+});
+}
+/* ================= COMPLETE VISUAL & UX POLISH ================= */
+(function polishPortal() {
+  var loginSec = document.getElementById('page-login');
+  if (loginSec) {
+    loginSec.style.position = 'relative';
+    loginSec.style.overflow = 'hidden';
+    var cvs = document.createElement('canvas');
+    cvs.width = 1440;
+    cvs.height = 700;
+    cvs.style.cssText = 'position:absolute; inset:0; width:100%; height:100%; object-fit:cover; z-index:0; pointer-events:none;';
+    loginSec.insertBefore(cvs, loginSec.firstChild);
+    if (loginSec.children[1]) {
+      loginSec.children[1].style.position = 'relative';
+      loginSec.children[1].style.zIndex = '1';
+    }
+
+    var ctx = cvs.getContext('2d');
+    var sky = ctx.createLinearGradient(0, 0, 1440, 700);
+    sky.addColorStop(0, '#07142b');
+    sky.addColorStop(0.55, '#132f63');
+    sky.addColorStop(1, '#9a3412');
+    ctx.fillStyle = sky;
+    ctx.fillRect(0, 0, 1440, 700);
+
+    ctx.fillStyle = 'rgba(253, 186, 116, 0.25)';
+    ctx.beginPath();
+    ctx.arc(1150, 160, 105, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.fillStyle = 'rgba(9, 22, 46, 0.82)';
+    ctx.beginPath();
+    ctx.moveTo(0, 520);
+    ctx.lineTo(280, 310);
+    ctx.lineTo(580, 490);
+    ctx.lineTo(940, 270);
+    ctx.lineTo(1440, 500);
+    ctx.lineTo(1440, 700);
+    ctx.lineTo(0, 700);
+    ctx.closePath();
+    ctx.fill();
+
+    ctx.fillStyle = '#050c1a';
+    ctx.fillRect(0, 545, 1440, 155);
+    ctx.fillStyle = '#94a3b8';
+    ctx.fillRect(0, 542, 1440, 6);
+
+    [90, 410].forEach(function(x) {
+      ctx.fillStyle = '#1e40af';
+      ctx.fillRect(x, 415, 305, 125);
+      ctx.fillStyle = '#ea580c';
+      ctx.fillRect(x, 475, 305, 18);
+      ctx.fillStyle = '#fde68a';
+      for (var w = 0; w < 5; w++) {
+        ctx.fillRect(x + 22 + w * 56, 434, 36, 26);
+      }
+    });
+
+    ctx.fillStyle = '#f8fafc';
+    ctx.beginPath();
+    ctx.moveTo(730, 415);
+    ctx.lineTo(970, 415);
+    ctx.quadraticCurveTo(1055, 415, 1085, 500);
+    ctx.lineTo(1095, 540);
+    ctx.lineTo(730, 540);
+    ctx.closePath();
+    ctx.fill();
+
+    ctx.fillStyle = '#ea580c';
+    ctx.fillRect(730, 475, 355, 22);
+    ctx.fillStyle = '#0f172a';
+    ctx.beginPath();
+    ctx.moveTo(950, 428);
+    ctx.lineTo(1030, 428);
+    ctx.lineTo(1062, 468);
+    ctx.lineTo(950, 468);
+    ctx.closePath();
+    ctx.fill();
+
+    ctx.fillStyle = '#fef08a';
+    ctx.beginPath();
+    ctx.arc(1082, 516, 11, 0, Math.PI * 2);
+    ctx.fill();
+    var beam = ctx.createLinearGradient(1090, 516, 1440, 516);
+    beam.addColorStop(0, 'rgba(254, 240, 138, 0.35)');
+    beam.addColorStop(1, 'rgba(254, 240, 138, 0)');
+    ctx.fillStyle = beam;
+    ctx.beginPath();
+    ctx.moveTo(1090, 510);
+    ctx.lineTo(1440, 440);
+    ctx.lineTo(1440, 595);
+    ctx.lineTo(1090, 524);
+    ctx.closePath();
+    ctx.fill();
+  }
+
+  function clearBookingForm() {
+    var tr = document.getElementById('ticketResult');
+    if (tr) tr.style.display = 'none';
+    selectedSeats = [];
+    var box = document.getElementById('passengerInputsBox');
+    if (box) box.innerHTML = '';
+    if (typeof updateSelectedSeatsLabel === 'function') updateSelectedSeatsLabel();
+  }
+
+  var origNav = navigateTo;
+  navigateTo = function(viewName) {
+    if (viewName === 'book') clearBookingForm();
+    origNav(viewName);
+  };
+
+  var origSearch = searchTrains;
+  searchTrains = function() {
+    clearBookingForm();
+    origSearch();
+  };
+
+  document.querySelectorAll('.card').forEach(function(c) {
+    c.style.borderTop = '4px solid #1d4ed8';
+    c.style.boxShadow = '0 10px 28px rgba(15, 37, 71, 0.08)';
+  });
+
+  var origLoadSeats = loadSeats;
+  loadSeats = function() {
+    return origLoadSeats().then(function() {
+      var avail = document.querySelectorAll('#seatGrid .seat.avail').length;
+      var sel = document.querySelectorAll('#seatGrid .seat.selected').length;
+      var booked = document.querySelectorAll('#seatGrid .seat.booked').length;
+      var banner = document.querySelector('.coach-banner');
+      if (banner && banner.children[1]) {
+        banner.children[1].textContent = 'COACH S1 • ' + (avail + sel) + ' AVAILABLE / ' + booked + ' BOOKED';
+      }
+    });
+  };
+})();
+
+</script>
+</body>
+</html>
