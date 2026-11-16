@@ -1,0 +1,267 @@
+
+#include <iostream>
+#include <vector>
+#include <string>
+using namespace std;
+
+class Train
+{
+private:
+    string trainName;
+    int seats[5][6];
+
+public:
+
+    Train(string name)
+    {
+        trainName = name;
+
+        for (int i = 0; i < 5; i++)
+        {
+            for (int j = 0; j < 6; j++)
+            {
+                seats[i][j] = 0;
+            }
+        }
+    }
+
+    void displaySeats()
+    {
+        cout << "\nTrain: " << trainName << endl;
+        cout << "\n0 = Available | 1 = Booked\n\n";
+
+        int seatNo = 1;
+
+        for (int i = 0; i < 5; i++)
+        {
+            for (int j = 0; j < 6; j++)
+            {
+                cout << seatNo << "["
+                     << seats[i][j] << "]\t";
+                seatNo++;
+            }
+            cout << endl;
+        }
+    }
+
+    void checkAvailability(int seatNo)
+    {
+        if (seatNo < 1 || seatNo > 30)
+        {
+            cout << "Invalid seat number!\n";
+            return;
+        }
+
+        int row = (seatNo - 1) / 6;
+        int col = (seatNo - 1) % 6;
+
+        if (seats[row][col] == 0)
+            cout << "Seat is Available.\n";
+        else
+            cout << "Seat is Already Booked.\n";
+    }
+
+    void bookSeat(int seatNo)
+    {
+        if (seatNo < 1 || seatNo > 30)
+        {
+            cout << "Invalid seat number!\n";
+            return;
+        }
+
+        int row = (seatNo - 1) / 6;
+        int col = (seatNo - 1) % 6;
+
+        if (seats[row][col] == 0)
+        {
+            seats[row][col] = 1;
+            cout << "Seat booked successfully!\n";
+        }
+        else
+        {
+            cout << "Seat is already booked!\n";
+        }
+    }
+
+    void bookMultipleSeats(vector<int> seatList)
+    {
+        bool valid = true;
+
+        for (int seatNo : seatList)
+        {
+            if (seatNo < 1 || seatNo > 30)
+            {
+                valid = false;
+                break;
+            }
+
+            int row = (seatNo - 1) / 6;
+            int col = (seatNo - 1) % 6;
+
+            if (seats[row][col] == 1)
+            {
+                valid = false;
+                break;
+            }
+        }
+
+        if (!valid)
+        {
+            cout << "Invalid or already booked seat found.\n";
+            return;
+        }
+
+        for (int seatNo : seatList)
+        {
+            int row = (seatNo - 1) / 6;
+            int col = (seatNo - 1) % 6;
+
+            seats[row][col] = 1;
+        }
+
+        cout << "Multiple seats booked successfully!\n";
+    }
+
+    void cancelBooking(int seatNo)
+    {
+        if (seatNo < 1 || seatNo > 30)
+        {
+            cout << "Invalid seat number!\n";
+            return;
+        }
+
+        int row = (seatNo - 1) / 6;
+        int col = (seatNo - 1) % 6;
+
+        if (seats[row][col] == 1)
+        {
+            seats[row][col] = 0;
+            cout << "Booking cancelled successfully!\n";
+        }
+        else
+        {
+            cout << "Seat is not booked!\n";
+        }
+    }
+    ~Train()
+    {
+        // Destructor called automatically
+    }
+};
+
+int main()
+{
+    Train trains[10] = {
+        Train("Shatabdi Express"),
+        Train("Jan Shatabdi"),
+        Train("Rajdhani Express"),
+        Train("Mumbai Rajdhani"),
+        Train("Duronto Express"),
+        Train("Garib Rath"),
+        Train("Vande Bharat"),
+        Train("Sampark Kranti"),
+        Train("Humsafar Express"),
+        Train("Intercity Express")
+    };
+
+    int trainChoice, choice;
+    int seatNo, n;
+
+    vector<int> seatList;
+
+    do
+    {
+        cout << "\n========== RAILWAY RESERVATION ==========\n";
+
+        cout << "\nSelect Train:\n";
+
+        for (int i = 0; i < 10; i++)
+        {
+            cout << i + 1 << ". Train " << i + 1 << endl;
+        }
+
+        cout << "0. Exit\n";
+
+        cout << "Enter train number: ";
+        cin >> trainChoice;
+
+        if (trainChoice == 0)
+            break;
+
+        if (trainChoice < 1 || trainChoice > 10)
+        {
+            cout << "Invalid train choice!\n";
+            continue;
+        }
+
+        Train &t = trains[trainChoice - 1];
+
+        do
+        {
+            cout << "\n========== MENU ==========\n";
+            cout << "1. Display Coach Layout\n";
+            cout << "2. Check Seat Availability\n";
+            cout << "3. Book Single Seat\n";
+            cout << "4. Book Multiple Seats\n";
+            cout << "5. Cancel Booking\n";
+            cout << "6. Change Train\n";
+
+            cout << "Enter choice: ";
+            cin >> choice;
+
+            switch (choice)
+            {
+                case 1:
+                    t.displaySeats();
+                    break;
+
+                case 2:
+                    cout << "Enter seat number: ";
+                    cin >> seatNo;
+                    t.checkAvailability(seatNo);
+                    break;
+
+                case 3:
+                    cout << "Enter seat number: ";
+                    cin >> seatNo;
+                    t.bookSeat(seatNo);
+                    break;
+
+                case 4:
+                    cout << "Enter number of seats: ";
+                    cin >> n;
+
+                    seatList.clear();
+
+                    for (int i = 0; i < n; i++)
+                    {
+                        cout << "Enter seat number: ";
+                        cin >> seatNo;
+                        seatList.push_back(seatNo);
+                    }
+
+                    t.bookMultipleSeats(seatList);
+                    break;
+
+                case 5:
+                    cout << "Enter seat number to cancel: ";
+                    cin >> seatNo;
+                    t.cancelBooking(seatNo);
+                    break;
+
+                case 6:
+                    cout << "Returning to train selection...\n";
+                    break;
+
+                default:
+                    cout << "Invalid choice!\n";
+            }
+
+        } while (choice != 6);
+
+    } while (true);
+
+    cout << "\nThank you for using Railway Reservation System!\n";
+
+    return 0;
+}
